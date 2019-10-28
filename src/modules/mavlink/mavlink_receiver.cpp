@@ -2608,32 +2608,33 @@ MavlinkReceiver::Run()
 					nread = recvfrom(_mavlink->get_socket_fd(), buf, sizeof(buf), 0, (struct sockaddr *)&srcaddr, &addrlen);
 				}
 
-				struct sockaddr_in &srcaddr_last = _mavlink->get_client_source_address();
+				//struct sockaddr_in &srcaddr_last = _mavlink->get_client_source_address();
 
-				int localhost = (127 << 24) + 1;
+				//int localhost = (127 << 24) + 1;
 
-				if (!_mavlink->get_client_source_initialized()) {
-
-					// set the address either if localhost or if 3 seconds have passed
-					// this ensures that a GCS running on localhost can get a hold of
-					// the system within the first N seconds
-					hrt_abstime stime = _mavlink->get_start_time();
-
-					if ((stime != 0 && (hrt_elapsed_time(&stime) > 3_s))
-					    || (srcaddr_last.sin_addr.s_addr == htonl(localhost))) {
-
-						srcaddr_last.sin_addr.s_addr = srcaddr.sin_addr.s_addr;
-						srcaddr_last.sin_port = srcaddr.sin_port;
-
-						_mavlink->set_client_source_initialized();
-
-						PX4_INFO("partner IP: %s", inet_ntoa(srcaddr.sin_addr));
-					}
-				}
+//				if (!_mavlink->get_client_source_initialized()) {
+//
+//					// set the address either if localhost or if 3 seconds have passed
+//					// this ensures that a GCS running on localhost can get a hold of
+//					// the system within the first N seconds
+//					hrt_abstime stime = _mavlink->get_start_time();
+//
+//					if ((stime != 0 && (hrt_elapsed_time(&stime) > 3_s))
+//					    || (srcaddr_last.sin_addr.s_addr == htonl(localhost))) {
+//
+//						srcaddr_last.sin_addr.s_addr = srcaddr.sin_addr.s_addr;
+//						srcaddr_last.sin_port = srcaddr.sin_port;
+//
+//						_mavlink->set_client_source_initialized();
+//
+//						PX4_INFO("partner IP: %s", inet_ntoa(srcaddr.sin_addr));
+//					}
+//				}
 			}
 
 			// only start accepting messages once we're sure who we talk to
 			if (_mavlink->get_client_source_initialized()) {
+			    PX4_INFO("Accepting Message from trusted parnter IP: %s:%i MSG ID: %i", inet_ntoa(srcaddr.sin_addr), ntohs(srcaddr.sin_port), msg.msgid);
 #endif // MAVLINK_UDP
 
 				/* if read failed, this loop won't execute */

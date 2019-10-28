@@ -641,6 +641,7 @@ private:
 	const char 		*_interface_name{nullptr};
 
 	int			_socket_fd{-1};
+	int         _listen_fd{-1};
 	Protocol		_protocol{Protocol::SERIAL};
 
 	radio_status_s		_rstatus {};

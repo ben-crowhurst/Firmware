@@ -64,7 +64,7 @@ Client::Client(int instance_id) :
 int
 Client::process_args(const int argc, const char **argv)
 {
-	std::string sock_path = get_socket_path(_instance_id);
+    std::string sock_path = get_socket_path(_instance_id);
 
 	_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 

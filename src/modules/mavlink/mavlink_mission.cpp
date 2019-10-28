@@ -755,6 +755,11 @@ MavlinkMissionManager::handle_mission_request_both(const mavlink_message_t *msg)
 	mavlink_msg_mission_request_decode(msg, &wpr);
 
 	if (CHECK_SYSID_COMPID_MISSION(wpr)) {
+
+PX4_WARN("Mission Manager state %i %s:%i", _state, __FILE__, __LINE__);
+PX4_WARN("msg.sysid(%i) == _transfer_partner_sysid(%i)", msg->sysid, _transfer_partner_sysid);
+PX4_WARN("msg.compid(%i) == _transfer_partner_compid(%i)", msg->compid, _transfer_partner_compid);
+
 		if (msg->sysid == _transfer_partner_sysid && msg->compid == _transfer_partner_compid) {
 			if (_state == MAVLINK_WPM_STATE_SENDLIST) {
 
@@ -823,6 +828,11 @@ MavlinkMissionManager::handle_mission_request_both(const mavlink_message_t *msg)
 
 		} else {
 			_mavlink->send_statustext_critical("WPM: REJ. CMD: partner id mismatch");
+
+
+PX4_WARN("Mission Manager state %i %s:%i", _state, __FILE__, __LINE__);
+PX4_WARN("msg.target_system(%i) == mavlink_system.sysid(%i)", wpr.target_system, mavlink_system.sysid);
+PX4_WARN("msg.target_component(%i) == mavlink_system.compid(%i)", wpr.target_component, mavlink_system.compid);
 
 			PX4_DEBUG("WPM: MISSION_ITEM_REQUEST(_INT) ERROR: rejected, partner ID mismatch");
 		}
@@ -1013,6 +1023,8 @@ MavlinkMissionManager::handle_mission_item_both(const mavlink_message_t *msg)
 			}
 
 		} else if (_state == MAVLINK_WPM_STATE_IDLE) {
+PX4_WARN("Mission Manager state %i %s:%i", _state, __FILE__, __LINE__);
+
 			if (_transfer_seq == wp.seq + 1) {
 				// Assume this is a duplicate, where we already successfully got all mission items,
 				// but the GCS did not receive the last ack and sent the same item again
@@ -1029,7 +1041,7 @@ MavlinkMissionManager::handle_mission_item_both(const mavlink_message_t *msg)
 
 		} else {
 			PX4_DEBUG("WPM: MISSION_ITEM ERROR: busy, state %i", _state);
-
+PX4_WARN("Mission Manager state %i %s:%i", _state, __FILE__, __LINE__);
 			_mavlink->send_statustext_critical("IGN MISSION_ITEM: Busy");
 			send_mission_ack(_transfer_partner_sysid, _transfer_partner_compid, MAV_MISSION_ERROR);
 			return;

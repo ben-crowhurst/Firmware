@@ -1111,27 +1111,85 @@ Mavlink::init_udp()
 {
 	PX4_DEBUG("Setting up UDP with port %d", _network_port);
 
-	_myaddr.sin_family = AF_INET;
-	_myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	_myaddr.sin_port = htons(_network_port);
+//    if ((_listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+//        PX4_WARN("create socket failed: %s", strerror(errno));
+//    }
+//
+//    //optval = 1;
+//    //setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval , sizeof(int));
+//    struct sockaddr_in _myaddr;
+//    bzero((char *) &_myaddr, sizeof(_myaddr));
+//    _myaddr.sin_family = AF_INET;
+//    _myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+//    _myaddr.sin_port = htons((unsigned short)_network_port);
+//
+//    if (bind(_listen_fd, (struct sockaddr *) &_myaddr, sizeof(_myaddr)) < 0) {
+//        PX4_WARN("bind socket failed: %s", strerror(errno));
+//    }
+//
+//    if (listen(_listen_fd, 1) < 0) {
+//        PX4_WARN("listen socket failed: %s", strerror(errno));
+//    }
+//
+//    int length = sizeof(_src_addr);
+//    if (accept(_listen_fd, (struct sockaddr *) &_src_addr, &length) < 0) {
+//        PX4_WARN("accept socket failed: %s", strerror(errno));
+//    }
 
-	if ((_socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+
+
+
+	_src_addr.sin_family = AF_INET;
+	inet_aton("127.0.0.1", &_src_addr.sin_addr);
+	_src_addr.sin_port = htons(_remote_port);
+
+    if ((_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		PX4_WARN("create socket failed: %s", strerror(errno));
 		return;
 	}
 
-	if (bind(_socket_fd, (struct sockaddr *)&_myaddr, sizeof(_myaddr)) < 0) {
-		PX4_WARN("bind failed: %s", strerror(errno));
+    if (connect(_socket_fd, (struct sockaddr*)&_src_addr, sizeof(_src_addr)) < 0) {
+		PX4_WARN("connect failed for port %i: %s", _remote_port, strerror(errno));
 		return;
+	} else {
+	    fcntl(_socket_fd, F_SETFL, O_NONBLOCK);
+	    set_client_source_initialized();
 	}
 
 	/* set default target address, but not for onboard mode (will be set on first received packet) */
-	if (!_src_addr_initialized) {
-		_src_addr.sin_family = AF_INET;
-		inet_aton("127.0.0.1", &_src_addr.sin_addr);
-	}
+	//if (!_src_addr_initialized) {
+	//	_src_addr.sin_family = AF_INET;
+	//	inet_aton("127.0.0.1", &_src_addr.sin_addr);
+	//}
 
-	_src_addr.sin_port = htons(_remote_port);
+	//_src_addr.sin_port = htons(_remote_port);
+
+
+
+
+
+
+	//_myaddr.sin_family = AF_INET;
+	//_myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	//_myaddr.sin_port = htons(_network_port);
+
+    //if ((_socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	//	PX4_WARN("create socket failed: %s", strerror(errno));
+	//	return;
+	//}
+
+	//if (bind(_socket_fd, (struct sockaddr *)&_myaddr, sizeof(_myaddr)) < 0) {
+	//	PX4_WARN("bind failed: %s", strerror(errno));
+	//	return;
+	//}
+
+	/* set default target address, but not for onboard mode (will be set on first received packet) */
+	//if (!_src_addr_initialized) {
+	//	_src_addr.sin_family = AF_INET;
+	//	inet_aton("127.0.0.1", &_src_addr.sin_addr);
+	//}
+
+	//_src_addr.sin_port = htons(_remote_port);
 }
 #endif // MAVLINK_UDP
 
@@ -1141,8 +1199,10 @@ Mavlink::handle_message(const mavlink_message_t *msg)
 	/*
 	 *  NOTE: this is called from the receiver thread
 	 */
+    PX4_INFO("Mavlink::handle_message");
 
 	if (get_forwarding_on()) {
+	    PX4_INFO("Mavlink::get_forwarding_on == true");
 		/* forward any messages to other mavlink instances */
 		Mavlink::forward_message(msg, this);
 	}
