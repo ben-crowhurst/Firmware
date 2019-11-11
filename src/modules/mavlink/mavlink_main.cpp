@@ -1137,18 +1137,18 @@ Mavlink::init_udp()
 //    }
 
 
-
+       const char* address = getenv("PX4_HOME_ADDR");
 
 	_src_addr.sin_family = AF_INET;
-	inet_aton("127.0.0.1", &_src_addr.sin_addr);
+	inet_aton(address, &_src_addr.sin_addr);
 	_src_addr.sin_port = htons(_remote_port);
 
-    if ((_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        if ((_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		PX4_WARN("create socket failed: %s", strerror(errno));
 		return;
 	}
 
-    if (connect(_socket_fd, (struct sockaddr*)&_src_addr, sizeof(_src_addr)) < 0) {
+        if (connect(_socket_fd, (struct sockaddr*)&_src_addr, sizeof(_src_addr)) < 0) {
 		PX4_WARN("connect failed for port %i: %s", _remote_port, strerror(errno));
 		return;
 	} else {
