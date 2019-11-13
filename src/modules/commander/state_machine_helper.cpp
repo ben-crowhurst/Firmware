@@ -517,6 +517,8 @@ bool set_nav_state(vehicle_status_s *status, actuator_armed_s *armed, commander_
 			 * check for datalink lost: this should always trigger RTGS */
 			enable_failsafe(status, old_failsafe, mavlink_log_pub, reason_no_datalink);
 
+PX4_INFO("Data link loss");
+
 			set_link_loss_nav_state(status, armed, status_flags, internal_state, data_link_loss_act,
 						vehicle_status_s::NAVIGATION_STATE_AUTO_RTGS);
 

@@ -2630,17 +2630,18 @@ MavlinkReceiver::Run()
 //						PX4_INFO("partner IP: %s", inet_ntoa(srcaddr.sin_addr));
 //					}
 //				}
+
 			}
 
 			// only start accepting messages once we're sure who we talk to
 			if (_mavlink->get_client_source_initialized()) {
-			    PX4_INFO("Accepting Message from trusted parnter IP: %s:%i MSG ID: %i", inet_ntoa(srcaddr.sin_addr), ntohs(srcaddr.sin_port), msg.msgid);
+			    //PX4_INFO("Accepting Message from trusted parnter IP: %s:%i MSG ID: %i", inet_ntoa(srcaddr.sin_addr), ntohs(srcaddr.sin_port), msg.msgid);
 #endif // MAVLINK_UDP
 
 				/* if read failed, this loop won't execute */
 				for (ssize_t i = 0; i < nread; i++) {
 					if (mavlink_parse_char(_mavlink->get_channel(), buf[i], &msg, &_status)) {
-
+PX4_INFO("Accepting Message from trusted parnter IP: %s:%i MSG ID: %i", inet_ntoa(srcaddr.sin_addr), ntohs(srcaddr.sin_port), msg.msgid);
 						/* check if we received version 2 and request a switch. */
 						if (!(_mavlink->get_status()->flags & MAVLINK_STATUS_FLAG_IN_MAVLINK1)) {
 							/* this will only switch to proto version 2 if allowed in settings */

@@ -277,6 +277,7 @@ MavlinkMissionManager::send_mission_current(uint16_t seq)
 
 	} else {
 		PX4_DEBUG("WPM: Send MISSION_CURRENT ERROR: seq %u out of bounds", seq);
+PX4_WARN("WPM: Send MISSION_CURRENT ERROR: seq %u, item_count out of bounds %s:%i", seq, __FILE__, __LINE__);
 
 		_mavlink->send_statustext_critical("ERROR: wp index out of bounds");
 	}
@@ -482,6 +483,7 @@ MavlinkMissionManager::send(const hrt_abstime now)
 			_current_seq = mission_result.seq_current;
 
 			PX4_DEBUG("WPM: got mission result, new current_seq: %u", _current_seq);
+			PX4_WARN("WPM: got mission result, new current_seq: %u", _current_seq);
 		}
 
 		if (_last_reached != mission_result.seq_reached) {
@@ -493,6 +495,7 @@ MavlinkMissionManager::send(const hrt_abstime now)
 			}
 
 			PX4_DEBUG("WPM: got mission result, new seq_reached: %d", _last_reached);
+			PX4_WARN("WPM: got mission result, new seq_reached: %d", _last_reached);
 		}
 
 		send_mission_current(_current_seq);
