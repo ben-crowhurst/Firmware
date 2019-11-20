@@ -42,6 +42,8 @@
 
 #include <termios.h>
 
+#include <signal.h>
+
 #ifdef CONFIG_NET
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -794,7 +796,6 @@ Mavlink::send_packet()
 	int ret = -1;
 
 #if defined(MAVLINK_UDP)
-
 	/* Only send packets if there is something in the buffer. */
 	if (_network_buf_len == 0) {
 		pthread_mutex_unlock(&_send_mutex);
@@ -802,13 +803,19 @@ Mavlink::send_packet()
 	}
 
 	if (get_protocol() == Protocol::UDP) {
-
 #ifdef CONFIG_NET
 
 		if (_src_addr_initialized) {
 #endif
 			ret = sendto(_socket_fd, _network_buf, _network_buf_len, 0,
 				     (struct sockaddr *)&_src_addr, sizeof(_src_addr));
+
+			if (-1 == ret && 14550 == _remote_port) {
+				sleep(1);
+				close(_socket_fd);
+				init_udp();
+				send_packet();
+			}
 #ifdef CONFIG_NET
 		}
 
@@ -1136,7 +1143,6 @@ Mavlink::init_udp()
 //        PX4_WARN("accept socket failed: %s", strerror(errno));
 //    }
 
-
        const char* address = getenv("PX4_HOME_ADDR");
 
 	_src_addr.sin_family = AF_INET;
@@ -1191,6 +1197,20 @@ Mavlink::init_udp()
 
 	//_src_addr.sin_port = htons(_remote_port);
 }
+
+void
+Mavlink::check_connection() {
+	if (_remote_port != 14550) return;
+
+        size_t length = 1;
+	char buffer[length] = {};
+	int status = recv(_socket_fd, buffer, length, MSG_PEEK | MSG_NOSIGNAL);
+	if (-1 == status) {
+		close(_socket_fd);
+		init_udp();
+	}
+}
+
 #endif // MAVLINK_UDP
 
 void

@@ -744,6 +744,8 @@ private:
 	void find_broadcast_address();
 
 	void init_udp();
+
+	void check_connection();
 #endif // MAVLINK_UDP
 
 
