@@ -1146,6 +1146,7 @@ Mavlink::init_udp()
        const char* address = getenv("PX4_HOME_ADDR");
        if (nullptr == address) {
 	       PX4_ERR("Failed to find a PX4_HOME_ADDR.");
+	       return;
        }
 
 	_src_addr.sin_family = AF_INET;
