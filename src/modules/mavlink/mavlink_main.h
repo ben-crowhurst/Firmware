@@ -636,6 +636,7 @@ private:
 
 	unsigned short		_network_port{14556};
 	unsigned short		_remote_port{DEFAULT_REMOTE_PORT_UDP};
+	unsigned short          _gndctrl_port{DEFAULT_REMOTE_PORT_UDP};
 #endif // MAVLINK_UDP
 
 	const char 		*_interface_name{nullptr};

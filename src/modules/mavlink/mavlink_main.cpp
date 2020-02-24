@@ -810,7 +810,7 @@ Mavlink::send_packet()
 			ret = sendto(_socket_fd, _network_buf, _network_buf_len, 0,
 				     (struct sockaddr *)&_src_addr, sizeof(_src_addr));
 
-			if (-1 == ret && 14550 == _remote_port) {
+			if (-1 == ret && _gndctrl_port == _remote_port) {
 				sleep(1);
 				close(_socket_fd);
 				init_udp();
@@ -1143,11 +1143,18 @@ Mavlink::init_udp()
 //        PX4_WARN("accept socket failed: %s", strerror(errno));
 //    }
 
-       const char* address = getenv("PX4_HOME_ADDR");
-       if (nullptr == address) {
+        const char* address = getenv("PX4_HOME_ADDR");
+        if (nullptr == address) {
 	       PX4_ERR("Failed to find a PX4_HOME_ADDR.");
 	       return;
-       }
+        }
+
+	const char* port = getenv("PX4_GNDCTRL_PORT");
+	if (nullptr != port) {
+		_remote_port = atoi(port);
+		_gndctrl_port = _remote_port;
+		PX4_INFO("Setting ground control port as %i.", _remote_port);
+	}
 
 	_src_addr.sin_family = AF_INET;
 	inet_aton(address, &_src_addr.sin_addr);
@@ -1204,7 +1211,7 @@ Mavlink::init_udp()
 
 void
 Mavlink::check_connection() {
-	if (_remote_port != 14550) return;
+	if (_remote_port != _gndctrl_port) return;
 
         size_t length = 1;
 	char buffer[length] = {};
@@ -1223,7 +1230,7 @@ Mavlink::handle_message(const mavlink_message_t *msg)
 	/*
 	 *  NOTE: this is called from the receiver thread
 	 */
-    PX4_INFO("Mavlink::handle_message");
+    //PX4_INFO("Mavlink::handle_message");
 
 	if (get_forwarding_on()) {
 	    PX4_INFO("Mavlink::get_forwarding_on == true");
