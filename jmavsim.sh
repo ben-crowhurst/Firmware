@@ -19,9 +19,9 @@ else
 fi
 
 export PX4_HOME_LAT=-35.363263
- 
+
 export PX4_HOME_LON=149.165238
- 
+
 export PX4_HOME_ALT=0
 
 make px4_sitl_default jmavsim
