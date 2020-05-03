@@ -1173,6 +1173,24 @@ Mavlink::init_udp()
 	    set_client_source_initialized();
 	}
 
+	const char* serial = getenv("PX4_SERIAL");
+        const char* username = getenv("PX4_USERNAME");
+	const char* password = getenv("PX4_PASSWORD");
+
+        size_t json_boilerplate_length = 33;
+	size_t length = strlen(serial) + strlen(username) + strlen(password) + json_boilerplate_length;
+
+        char* credentials = (char*)calloc(length, sizeof(char));
+	sprintf(credentials, "{username:\"%s\",password:\"%s\",serial:%s}", username, password, serial);
+
+	ssize_t size = write(_socket_fd, credentials, length);
+	if (-1 == size) {
+	       PX4_ERR("Failed to write authentication credentials.");
+	       return;
+	}
+
+	free(credentials);
+
 	/* set default target address, but not for onboard mode (will be set on first received packet) */
 	//if (!_src_addr_initialized) {
 	//	_src_addr.sin_family = AF_INET;
